@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Management System</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+  <header>
+    <nav class="nav-container">
+      <!-- Empty nav bar -->
+      
+    </nav>
+  </header>
+  <div class="main-content">
+
+    <div class="left-panel">
+      <h1>Manage your deliveries with DRRaM-AI</h1>
+      <div class="form-container">
+        <div>
+          <label for="hub-address"><i class="fas fa-warehouse"></i>Enter your starting address:</label>
+          <input type="text" id="hub-address" name="hub-address" required>
+
+          <label for="number-of-routes"><i class="fas fa-car"></i>Enter your number of drivers:</label>
+          <input type="text" id="numRoutes" name="numRoutes" required>
+          <br></br>
+          <div class="button-container">
+            <button id="checking">Submit Hub Address</button>
+          </div>
+        </div>
+        <br>
+
+        <form id="destinationForm" style="display: none;">
+          <div class="form-group">
+            <label for="address">Enter your address: </label>
+            <input type="text" id="address" name="address" required>
+          </div>
+          <div class="form-group">
+            <label for="deadline">Deadline:</label>
+            <input type="text" id="deadline" name="deadline" required>
+          </div>
+          <button class="wow" type="submit">Add Destination</button>
+        </form>
+        <button class="wow" id="calculateRouteButton">Calculate Optimized Route</button>
+        <div id="optimizedRouteContainer" style="margin-top: 20px;">
+
+          <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+            <img src="gif.gif" alt="Loading..." />
+          </div>
+          <!-- EXTRA START -->
+          <!-- <input type="number" id="numVehicles" placeholder="Enter number of vehicles" min="1" />
+        <button id="calculateRouteButton">Calculate Routes</button> -->
+          <!-- EXTRA END -->
+          <p id="optimizedRouteSequence"></p>
+        </div>
+      </div>
+
+    </div>
+
+    
+
+    <div class="right-panel">
+        <h2>Available Destinations</h2>
+        <div id="availableDestinationsContainer" style="margin-top: 20px;"></div>
+        <div id="overlay" class="overlay" style="display: none;"></div>
+        <br>
+        
+      <!-- <div class="geomapContainer" style="margin-top: 20px;">
+    <div id="map"></div>
+  </div> -->
+      <div class="map-container">
+        <h2>Optimized Route</h2>
+        <!-- <h2>Locations</h2> -->
+        <div id="mapContainer" style="margin-top: 20px;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14014.714858278245!2d77.05486663330798!3d28.57940895441047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1b1bd325778b%3A0xa69f97e4ba590a3f!2sDwarka%20Sector%209%2C%20Dwarka%2C%20Delhi!5e0!3m2!1sen!2sin!4v1735241490065!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+
+      <!-- The map will load here -->
+    </div>
+  </div>
+  </div>
+  <script src="scripts.js"></script>
+
+
+  <script>
+    document.getElementById("checking").addEventListener("click", function () {
+      document.getElementById("destinationForm").style.display = 'block';
+      document.getElementById("hub-address").readOnly = true;
+    })
+    document.getElementById("calculateRouteButton").addEventListener("click", async () => {
+      try {
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("loadingSpinner").style.display = "block";
+        document.getElementById("calculateRouteButton").disabled = true;
+        const destinationResponse = await fetch("http://127.0.0.1:5000/destinations");
+        if (!destinationResponse.ok) {
+          throw new Error("Failed to fetch destinations.");
+        }
+
+        const destinationData = await destinationResponse.json();
+        const destinations = destinationData.destinations;
+
+        // Send the destinations data to the backend to calculate the optimized route
+        const response = await fetch("http://127.0.0.1:5000/plan_optimized_route", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ destinations }),
+        });
+
+        if (response.ok) {
+          // Step 1: Clear the previous iframe content (if any)
+          const mapContainer = document.getElementById("mapContainer");
+          mapContainer.innerHTML = '';
+          document.getElementById("overlay").style.display = "none";
+          document.getElementById("loadingSpinner").style.display = "none";
+          document.getElementById("calculateRouteButton").disabled = false;
+          // Step 2: Dynamically update the iframe to show the new map
+          mapContainer.innerHTML = `<iframe src="http://127.0.0.1:5501/backend/route_map.html" 
+                                        style="width: 100%; height: 400px; border: none;"></iframe>`;
+        } else {
+          throw new Error("Failed to calculate the optimized route.");
+        }
+      } catch (error) {
+        console.error("An error occurred:", error.message);
+        alert("An error occurred: " + error.message);
+      }
+    });
+  </script>
+
+</body>
+
+</html>

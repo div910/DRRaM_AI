@@ -1,0 +1,8 @@
+requests
+flask
+flask_sqlalchemy
+networkx
+geopy
+flask_cors
+folium
+scikit-learn
