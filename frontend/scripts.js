@@ -242,7 +242,7 @@ function calculateOptimizedRoute() {
           // Update the map iframe once after processing all routes
           const iframe = document.getElementById("mapContainer").querySelector("iframe");
           if (iframe) {
-            iframe.src = "http://127.0.0.1:5501/backend/route_map.html";  // Always load the updated map with all routes
+            iframe.src = "/static/backend/route_map.html";  // Always load the updated map with all routes
           }
         })
         .catch(function (error) {
