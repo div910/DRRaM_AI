@@ -1,3 +1,8 @@
 .DS_Store
 .idea/
 .idea/*
+backend/__pycache__/
+env/
+backend/route_map.html
+backend/instance
+backend/instance/*
