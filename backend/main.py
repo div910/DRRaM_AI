@@ -1,8 +1,11 @@
 from flask import request, jsonify
+import os
+import sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
 from config import app, db
 from models import Destination
 import aux_functions
-import os
 from flask import send_from_directory, Flask, send_file
 
 hubLatitude = None
